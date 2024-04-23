@@ -1,0 +1,329 @@
+#PRAC MAP REUCE GRADES
+from mrjob.job import MRJob
+
+class GradeCalculatorJob(MRJob):
+    def mapper(self, _, line):
+        name, score = line.split(",")
+        score = int(score)
+        yield name, score
+
+    def reducer(self, key, values):
+        total_score = 0
+        num_scores = 0
+        for score in values:
+            total_score += score
+            num_scores += 1
+        average_score = total_score / num_scores
+
+        # Determine the grade based on the average score
+        if average_score >= 90:
+            grade = 'A'
+        elif average_score >= 80:
+            grade = 'B'
+        elif average_score >= 70:
+            grade = 'C'
+        elif average_score >= 60:
+            grade = 'D'
+        else:
+            grade = 'F'
+
+        # Emit the name and grade
+        yield key, grade
+
+if __name__ == '__main__':
+    GradeCalculatorJob.run()
+---------------------------------------------------------------------------------------------------------------------------------------
+# PRAC WORD COUTN RE
+# # import re
+# # from multiprocessing import Pool
+
+# # WORD_RE = re.compile(r"[\w']+")
+
+# # def read_file(file_name):
+# #     with open(filename, 'r') as file:
+# #         return file.readlines()
+
+# # def reducer(mapped_counts):
+# #     reduced_counts = {}
+# #     for word_count in mapped_counts:
+# #         for word, count in word_count.items():
+# #             reduced_counts[word] = reduced_counts.get(word, 0) + count
+# #             print(reduced_counts)
+# #             return reduced_counts
+
+
+
+# # def main(filename, target_word):
+# #     lines = read_file(filename)
+# #     with Pool() as pool:
+# #         mapped_counts = pool.map(mapper, lines)
+# #     reduced_counts = reducer(mapped_counts)
+
+# # # Get the frequency of the target word
+# #     target_frequency = reduced_counts.get(target_word.lower(), 0)
+# #     print(f"The frequency of '{target_word}' in the file is: {target_frequency}")
+
+# # if __name__ == "__main__":
+# #     filename = input("Enter the file name: ")
+# #     target_word = input("Enter the word to find frequency: ")
+# #     main(filename, target_word)
+
+
+# import re
+# from multiprocessing import Pool
+
+# WORD_RE = re.compile(r"[\w']+")
+
+# def read_file(file_name):
+#     with open(file_name, 'r') as file:
+#         return file.readlines()
+
+# def mapper(line):
+#     return WORD_RE.findall(line)
+
+# def reducer(mapped_counts):
+#     reduced_counts = {}
+#     for word_count in mapped_counts:
+#         for word, count in word_count.items():
+#             reduced_counts[word] = reduced_counts.get(word, 0) + count
+#     return reduced_counts
+
+# def main(filename, target_word):
+#     lines = read_file(filename)
+#     with Pool() as pool:
+#         mapped_counts = pool.map(mapper, lines)
+#     reduced_counts = reducer(mapped_counts)
+
+#     # Get the frequency of the target word
+#     target_frequency = reduced_counts.get(target_word.lower(), 0)
+#     print(f"The frequency of '{target_word}' in the file is: {target_frequency}")
+
+# if __name__ == "__main__":
+#     filename = input("Enter the file name: ")
+#     target_word = input("Enter the word to find frequency: ")
+#     main(filename, target_word)
+
+import re
+from multiprocessing import Pool
+from collections import defaultdict
+
+WORD_RE = re.compile(r"[\w']+")
+
+def read_file(file_name):
+    with open(file_name, 'r') as file:
+        return file.readlines()
+
+def mapper(line):
+    word_counts = defaultdict(int)
+    words = WORD_RE.findall(line)
+    for word in words:
+        word_counts[word.lower()] += 1
+    return word_counts
+
+def reducer(mapped_counts):
+    reduced_counts = defaultdict(int)
+    for word_count in mapped_counts:
+        for word, count in word_count.items():
+            reduced_counts[word] += count
+    return reduced_counts
+
+def main(filename, target_word):
+    lines = read_file(filename)
+    with Pool() as pool:
+        mapped_counts = pool.map(mapper, lines)
+    reduced_counts = reducer(mapped_counts)
+
+    # Get the frequency of the target word
+    target_frequency = reduced_counts.get(target_word.lower(), 0)
+    print(f"The frequency of '{target_word}' in the file is: {target_frequency}")
+
+if __name__ == "__main__":
+    filename = input("Enter the file name: ")
+    target_word = input("Enter the word to find frequency: ")
+    main(filename, target_word)
+
+
+
+
+
+--------------------------------------------------------------------------------------------------------------
+# PRAC MAR\TRIX
+import multiprocessing  #module to run mapper and reducer function simultaneously
+
+def matrix_multiply_mapper(row,col):
+    result=0
+    for i in range(len(row)):
+        result=result+row[i]*col[i]
+    return result
+
+def matrix_multiply_worker(args):
+    row_index,row,columns=args
+    return [(row_index,col_index,matrix_multiply_mapper(row,col)) for col_index,col in enumerate(columns)]
+
+def matrix_multiply_reduce(results):
+    final_result={}
+    for row_index,col_index,value in results:
+        if row_index not in final_result:
+            final_result[row_index]={}
+        final_result[row_index][col_index]=value
+    
+    return final_result
+
+def map_reduce_matrix_multiply(matrix1,matrix2):
+    num_workers=multiprocessing.cpu_count()
+    # print(num_workers)
+    pool=multiprocessing.Pool(processes=num_workers)
+
+    args=[(i,matrix1[i],matrix2) for i in range(len(matrix1))]
+    intermediate_results=pool.map(matrix_multiply_worker,args)
+    pool.close()
+    pool.join()
+
+    final_result=matrix_multiply_reduce([item for sublist in intermediate_results for item in sublist])
+
+    return final_result
+
+
+if __name__=='__main__':
+
+    matrix1=[
+        [1,2,3],
+        [4,5,6],
+        [7,8,9]
+    ]
+    matrix2=[
+        [1,2,3],
+        [4,5,6], 
+        [7,8,9]
+    ]
+    result=map_reduce_matrix_multiply(matrix1,matrix2)
+    for row_index in result.items():
+        print(row_index)
+----------------------------------------------------------------------------------------
+# PRAC TITA
+import pandas as pandas
+
+def map_reduce_with_pandas(input_file):
+    df=pandas.read_csv(input_file)
+
+    deceased_males = df[(df['Survived'] == 0) & (df['Sex'] == 'male')]
+
+    average_age_deceases_males=deceased_males['Age'].mean()
+
+    deceased_females_class=df[(df['Survived'] == 0) & (df['Sex'] == 'female')]
+
+    count_deceased_females_by_class = deceased_females_class['Pclass'].value_counts()
+    return average_age_deceases_males, count_deceased_females_by_class
+# Example usage
+
+input_file = r'C:\VS CODE\PRAC_CL4\Titanic-Dataset.csv' # Update thisto the path of your Titanic dataset CSV file
+average_age, female_class_count = map_reduce_with_pandas(input_file)
+print(f"Average age of males who died: {average_age:.2f}")
+print("Number of deceased females in each class:")
+print(female_class_count)
+
+-------------------------------------------------------------------------------------------------------
+Microsoft Windows [Version 10.0.22631.3296]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\Zidane Khan>mongo
+MongoDB shell version v5.0.12
+connecting to: mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb
+Implicit session: session { "id" : UUID("5efdcbc9-8537-48e4-87e2-77c82dfb260d") }
+MongoDB server version: 5.0.12
+================
+Warning: the "mongo" shell has been superseded by "mongosh",
+which delivers improved usability and compatibility.The "mongo" shell has been deprecated and will be removed in
+an upcoming release.
+For installation instructions, see
+https://docs.mongodb.com/mongodb-shell/install/
+================
+---
+The server generated these startup warnings when booting:
+        2024-04-23T11:07:33.320+05:30: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+---
+---
+        Enable MongoDB's free cloud-based monitoring service, which will then receive and display
+        metrics about your deployment (disk utilization, CPU, operation statistics, etc).
+
+        The monitoring data will be available on a MongoDB website with a unique URL accessible to you
+        and anyone you share the URL with. MongoDB may use this information to make product
+        improvements and to suggest MongoDB products and deployment options to you.
+
+        To enable free monitoring, run the following command: db.enableFreeMonitoring()
+        To permanently disable this reminder, run the following command: db.disableFreeMonitoring()
+---
+> use zidane_21
+switched to db zidane_21
+> use zidane_22
+switched to db zidane_22
+> db.createCollections("sales")
+uncaught exception: TypeError: db.createCollections is not a function :
+@(shell):1:1
+> db.createCollection("sales")
+{ "ok" : 1 }
+> show collections
+sales
+> db.insertMany([{"id":1,"item":"abc","price":200},{"id":2,"item":"xyz","price":300}])
+uncaught exception: TypeError: db.insertMany is not a function :
+@(shell):1:1
+> db.insertMany([{"id":1,"item":"abc","price":200},{"id":2,"item":"xyz","price":300}])
+uncaught exception: TypeError: db.insertMany is not a function :
+@(shell):1:1
+> db.sales.insertMany([{"id":1,"item":"abc","price":200},{"id":2,"item":"xyz","price":300}])
+{
+        "acknowledged" : true,
+        "insertedIds" : [
+                ObjectId("6627b6dc3efcd3e8bbe36339"),
+                ObjectId("6627b6dc3efcd3e8bbe3633a")
+        ]
+}
+> db.sales.find()
+{ "_id" : ObjectId("6627b6dc3efcd3e8bbe36339"), "id" : 1, "item" : "abc", "price" : 200 }
+{ "_id" : ObjectId("6627b6dc3efcd3e8bbe3633a"), "id" : 2, "item" : "xyz", "price" : 300 }
+> db.sales.find.pretty()
+uncaught exception: TypeError: db.sales.find.pretty is not a function :
+@(shell):1:1
+> db.sales.find().pretty()
+{
+        "_id" : ObjectId("6627b6dc3efcd3e8bbe36339"),
+        "id" : 1,
+        "item" : "abc",
+        "price" : 200
+}
+{
+        "_id" : ObjectId("6627b6dc3efcd3e8bbe3633a"),
+        "id" : 2,
+        "item" : "xyz",
+        "price" : 300
+}
+> db.sales.update({item:"abc"},{$set:{item:"pqr"price"}}:200},{multi:true})
+uncaught exception: SyntaxError: missing } after property list :
+@(shell):1:46
+> db.sales.update({item:"abc"},{$set:{item:"pqr"}:200},{multi:true})
+uncaught exception: SyntaxError: missing } after property list :
+@(shell):1:47
+> db.sales.update({item:"abc"},{$set:{item:"pqr"}},{multi:true})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.sales.find()
+{ "_id" : ObjectId("6627b6dc3efcd3e8bbe36339"), "id" : 1, "item" : "pqr", "price" : 200 }
+{ "_id" : ObjectId("6627b6dc3efcd3e8bbe3633a"), "id" : 2, "item" : "xyz", "price" : 300 }
+> db.sales.remove({price:200})
+WriteResult({ "nRemoved" : 1 })
+> db.sales.find()
+{ "_id" : ObjectId("6627b6dc3efcd3e8bbe3633a"), "id" : 2, "item" : "xyz", "price" : 300 }
+> db.sales.find().pretty()
+{
+        "_id" : ObjectId("6627b6dc3efcd3e8bbe3633a"),
+        "id" : 2,
+        "item" : "xyz",
+        "price" : 300
+}
+> db.sales.remove({item:"xyz"})
+WriteResult({ "nRemoved" : 1 })
+> db.sales.find().pretty()
+
+
+
+>
+

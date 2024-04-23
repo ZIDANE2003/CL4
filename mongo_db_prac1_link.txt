@@ -1,0 +1,106 @@
+Microsoft Windows [Version 10.0.22631.3296]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\Zidane Khan>mongo
+MongoDB shell version v5.0.12
+connecting to: mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb
+Implicit session: session { "id" : UUID("5efdcbc9-8537-48e4-87e2-77c82dfb260d") }
+MongoDB server version: 5.0.12
+================
+Warning: the "mongo" shell has been superseded by "mongosh",
+which delivers improved usability and compatibility.The "mongo" shell has been deprecated and will be removed in
+an upcoming release.
+For installation instructions, see
+https://docs.mongodb.com/mongodb-shell/install/
+================
+---
+The server generated these startup warnings when booting:
+        2024-04-23T11:07:33.320+05:30: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+---
+---
+        Enable MongoDB's free cloud-based monitoring service, which will then receive and display
+        metrics about your deployment (disk utilization, CPU, operation statistics, etc).
+
+        The monitoring data will be available on a MongoDB website with a unique URL accessible to you
+        and anyone you share the URL with. MongoDB may use this information to make product
+        improvements and to suggest MongoDB products and deployment options to you.
+
+        To enable free monitoring, run the following command: db.enableFreeMonitoring()
+        To permanently disable this reminder, run the following command: db.disableFreeMonitoring()
+---
+> use zidane_21
+switched to db zidane_21
+> use zidane_22
+switched to db zidane_22
+> db.createCollections("sales")
+uncaught exception: TypeError: db.createCollections is not a function :
+@(shell):1:1
+> db.createCollection("sales")
+{ "ok" : 1 }
+> show collections
+sales
+> db.insertMany([{"id":1,"item":"abc","price":200},{"id":2,"item":"xyz","price":300}])
+uncaught exception: TypeError: db.insertMany is not a function :
+@(shell):1:1
+> db.insertMany([{"id":1,"item":"abc","price":200},{"id":2,"item":"xyz","price":300}])
+uncaught exception: TypeError: db.insertMany is not a function :
+@(shell):1:1
+> db.sales.insertMany([{"id":1,"item":"abc","price":200},{"id":2,"item":"xyz","price":300}])
+{
+        "acknowledged" : true,
+        "insertedIds" : [
+                ObjectId("6627b6dc3efcd3e8bbe36339"),
+                ObjectId("6627b6dc3efcd3e8bbe3633a")
+        ]
+}
+> db.sales.find()
+{ "_id" : ObjectId("6627b6dc3efcd3e8bbe36339"), "id" : 1, "item" : "abc", "price" : 200 }
+{ "_id" : ObjectId("6627b6dc3efcd3e8bbe3633a"), "id" : 2, "item" : "xyz", "price" : 300 }
+> db.sales.find.pretty()
+uncaught exception: TypeError: db.sales.find.pretty is not a function :
+@(shell):1:1
+> db.sales.find().pretty()
+{
+        "_id" : ObjectId("6627b6dc3efcd3e8bbe36339"),
+        "id" : 1,
+        "item" : "abc",
+        "price" : 200
+}
+{
+        "_id" : ObjectId("6627b6dc3efcd3e8bbe3633a"),
+        "id" : 2,
+        "item" : "xyz",
+        "price" : 300
+}
+> db.sales.update({item:"abc"},{$set:{item:"pqr"price"}}:200},{multi:true})
+uncaught exception: SyntaxError: missing } after property list :
+@(shell):1:46
+> db.sales.update({item:"abc"},{$set:{item:"pqr"}:200},{multi:true})
+uncaught exception: SyntaxError: missing } after property list :
+@(shell):1:47
+> db.sales.update({item:"abc"},{$set:{item:"pqr"}},{multi:true})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.sales.find()
+{ "_id" : ObjectId("6627b6dc3efcd3e8bbe36339"), "id" : 1, "item" : "pqr", "price" : 200 }
+{ "_id" : ObjectId("6627b6dc3efcd3e8bbe3633a"), "id" : 2, "item" : "xyz", "price" : 300 }
+> db.sales.remove({price:200})
+WriteResult({ "nRemoved" : 1 })
+> db.sales.find()
+{ "_id" : ObjectId("6627b6dc3efcd3e8bbe3633a"), "id" : 2, "item" : "xyz", "price" : 300 }
+> db.sales.find().pretty()
+{
+        "_id" : ObjectId("6627b6dc3efcd3e8bbe3633a"),
+        "id" : 2,
+        "item" : "xyz",
+        "price" : 300
+}
+> db.sales.remove({item:"xyz"})
+WriteResult({ "nRemoved" : 1 })
+> db.sales.find().pretty()
+
+
+
+>
+
+
+http://services.odata.org/V3/Northwind/Northwind.svc/
